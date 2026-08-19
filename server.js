@@ -67,6 +67,10 @@ function createWhatsAppClient() {
         puppeteer: {
             headless: true,
             executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || systemChromePath,
+            env: {
+                ...process.env,
+                LD_LIBRARY_PATH: '/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu:/usr/lib:/lib:' + (process.env.LD_LIBRARY_PATH || '')
+            },
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
