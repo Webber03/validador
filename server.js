@@ -111,7 +111,8 @@ function createWhatsAppClient() {
 
     client.initialize().catch(err => {
         clientStatus = 'DISCONNECTED';
-        io.emit('status', { status: clientStatus, message: 'Erro ao inicializar: ' + err.message });
+        const errMsg = 'Erro ao inicializar o navegador: ' + (err.message || err);
+        io.emit('status', { status: clientStatus, message: errMsg });
         console.error('Erro na inicialização do cliente WhatsApp:', err);
     });
 }
@@ -396,6 +397,12 @@ io.on('connection', (socket) => {
         } catch (err) {
             console.error('Erro geral durante o processo de logout:', err);
         }
+    });
+
+    // Reconectar WhatsApp manualmente
+    socket.on('reconnect-whatsapp', () => {
+        console.log('Solicitação manual de reconexão do WhatsApp recebida...');
+        recreateWhatsAppClientGracefully();
     });
 });
 

@@ -79,6 +79,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 statusText.innerText = 'Desconectado';
                 stateDisconnected.style.display = 'flex';
                 btnStart.disabled = true;
+                if (data.message) {
+                    const descEl = stateDisconnected.querySelector('.state-desc');
+                    if (descEl) descEl.innerText = data.message;
+                }
                 break;
             case 'INITIALIZING':
                 statusText.innerText = 'Inicializando...';
@@ -109,7 +113,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // reconectar e deslogar
     btnReconnect.addEventListener('click', () => {
-        location.reload();
+        statusText.innerText = 'Inicializando...';
+        stateDisconnected.style.display = 'none';
+        stateInitializing.style.display = 'flex';
+        socket.emit('reconnect-whatsapp');
     });
 
     btnLogout.addEventListener('click', () => {
