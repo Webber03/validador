@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsValidate - Validador de Números de WhatsApp</title>
+    <!-- FontAwesome para ícones premium -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts (Inter) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Folha de estilo CSS customizada -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar / Cabeçalho -->
+        <header class="header">
+            <div class="logo">
+                <i class="fa-brands fa-whatsapp logo-icon"></i>
+                <span class="logo-text">Whats<span class="highlight">Validate</span></span>
+            </div>
+            <div class="connection-pill" id="connection-badge">
+                <span class="status-dot disconnected"></span>
+                <span class="status-label" id="connection-status-text">Buscando status...</span>
+            </div>
+        </header>
+
+        <!-- Corpo Principal em Grid -->
+        <main class="main-content">
+            <!-- Coluna da Esquerda (Controles e Autenticação) -->
+            <section class="left-panel">
+                <!-- Painel do WhatsApp QR / Sessão -->
+                <div class="glass-card whatsapp-session-card">
+                    <h2 class="card-title"><i class="fa-solid fa-qrcode title-icon"></i>Conexão WhatsApp</h2>
+                    
+                    <div class="session-box" id="session-box">
+                        <!-- Estado Desconectado -->
+                        <div class="session-state" id="state-disconnected" style="display: none;">
+                            <p class="state-desc">O cliente de automação foi fechado ou desconectado.</p>
+                            <button class="btn btn-primary" id="btn-reconnect"><i class="fa-solid fa-rotate-right"></i> Reconectar WhatsApp</button>
+                        </div>
+
+                        <!-- Estado Inicializando -->
+                        <div class="session-state" id="state-initializing" style="display: none;">
+                            <div class="spinner"></div>
+                            <p class="state-desc">Iniciando o navegador em segundo plano...</p>
+                        </div>
+
+                        <!-- Estado QR Code -->
+                        <div class="session-state" id="state-qr" style="display: none;">
+                            <p class="state-desc">Escaneie o QR Code abaixo com o WhatsApp do seu celular para conectar.</p>
+                            <div class="qr-container">
+                                <img id="qr-img" src="" alt="WhatsApp QR Code">
+                            </div>
+                        </div>
+
+                        <!-- Estado Autenticando -->
+                        <div class="session-state" id="state-connecting" style="display: none;">
+                            <div class="spinner"></div>
+                            <p class="state-desc">Autenticando sessão... Aguarde um momento.</p>
+                        </div>
+
+                        <!-- Estado Conectado -->
+                        <div class="session-state" id="state-connected" style="display: none;">
+                            <div class="connected-icon-box">
+                                <i class="fa-solid fa-circle-check check-icon"></i>
+                            </div>
+                            <p class="state-desc success-text">Dispositivo Conectado com sucesso!</p>
+                            <p class="sub-desc">Sessão ativa e salva. Pronto para validar números.</p>
+                            <button class="btn btn-danger" id="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Desconectar Conta</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Painel de Entrada de Números -->
+                <div class="glass-card">
+                    <h2 class="card-title"><i class="fa-solid fa-list-numeric title-icon"></i>Inserir Números</h2>
+                    <p class="card-subtitle">Insira um número por linha ou faça upload de um arquivo TXT/CSV.</p>
+                    
+                    <div class="input-container">
+                        <textarea id="numbers-textarea" placeholder="Exemplo:&#10;5511999999999&#10;5521988888888&#10;+55 (11) 97777-7777" rows="8"></textarea>
+                    </div>
+
+                    <!-- Dropzone de Arquivos -->
+                    <div class="file-dropzone" id="file-dropzone">
+                        <i class="fa-solid fa-file-arrow-up dropzone-icon"></i>
+                        <p class="dropzone-text">Arraste ou clique para enviar arquivo TXT/CSV</p>
+                        <input type="file" id="file-input" accept=".txt,.csv" style="display: none;">
+                    </div>
+                    <div class="file-info" id="file-info" style="display: none;">
+                        <span class="file-name"><i class="fa-solid fa-file-lines"></i> <span id="selected-file-name">nome.txt</span></span>
+                        <button class="btn-clear-file" id="btn-clear-file"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+
+                    <!-- Configuração de Delay -->
+                    <div class="settings-box">
+                        <label for="delay-input" class="settings-label">
+                            <span>Delay entre validações (ms):</span>
+                            <span class="tooltip"><i class="fa-solid fa-circle-info"></i><span class="tooltiptext">Evita bloqueios do WhatsApp. Recomendado: 1000ms a 2000ms.</span></span>
+                        </label>
+                        <input type="number" id="delay-input" value="1200" min="500" max="10000" step="100">
+                    </div>
+
+                    <!-- Botão de Ação -->
+                    <button class="btn btn-success btn-large" id="btn-start" disabled>
+                        <i class="fa-solid fa-play"></i> Iniciar Validação
+                    </button>
+                </div>
+            </section>
+
+            <!-- Coluna da Direita (Painel de Resultados e Progresso) -->
+            <section class="right-panel">
+                <!-- Dashboard de Resumos (KPIs) -->
+                <div class="kpi-grid">
+                    <div class="kpi-card total">
+                        <div class="kpi-info">
+                            <span class="kpi-label">Total Carregado</span>
+                            <span class="kpi-value" id="kpi-total">0</span>
+                        </div>
+                        <div class="kpi-icon-wrapper"><i class="fa-solid fa-layer-group"></i></div>
+                    </div>
+                    <div class="kpi-card checked">
+                        <div class="kpi-info">
+                            <span class="kpi-label">Processados</span>
+                            <span class="kpi-value" id="kpi-checked">0</span>
+                        </div>
+                        <div class="kpi-icon-wrapper"><i class="fa-solid fa-spinner"></i></div>
+                    </div>
+                    <div class="kpi-card valid">
+                        <div class="kpi-info">
+                            <span class="kpi-label">Válidos (Whats)</span>
+                            <span class="kpi-value" id="kpi-valid">0</span>
+                        </div>
+                        <div class="kpi-icon-wrapper"><i class="fa-solid fa-circle-check"></i></div>
+                    </div>
+                    <div class="kpi-card invalid">
+                        <div class="kpi-info">
+                            <span class="kpi-label">Inválidos</span>
+                            <span class="kpi-value" id="kpi-invalid">0</span>
+                        </div>
+                        <div class="kpi-icon-wrapper"><i class="fa-solid fa-circle-xmark"></i></div>
+                    </div>
+                </div>
+
+                <!-- Painel de Progresso Ativo -->
+                <div class="glass-card progress-card" id="progress-card" style="display: none;">
+                    <div class="progress-header">
+                        <span class="progress-status" id="validation-progress-text">Processando...</span>
+                        <span class="progress-percentage" id="validation-percentage-text">0%</span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progress-bar-fill" style="width: 0%;"></div>
+                    </div>
+                    <div class="control-buttons">
+                        <button class="btn btn-warning" id="btn-pause" style="display: none;"><i class="fa-solid fa-pause"></i> Pausar</button>
+                        <button class="btn btn-warning" id="btn-resume" style="display: none;"><i class="fa-solid fa-play"></i> Retomar</button>
+                        <button class="btn btn-danger" id="btn-stop"><i class="fa-solid fa-stop"></i> Parar Validação</button>
+                    </div>
+                </div>
+
+                <!-- Painel de Tabela de Resultados -->
+                <div class="glass-card table-card">
+                    <div class="table-header">
+                        <h2 class="card-title"><i class="fa-solid fa-database title-icon"></i>Resultados da Validação</h2>
+                        <div class="table-filters">
+                            <button class="filter-btn active" data-filter="all">Todos</button>
+                            <button class="filter-btn" data-filter="valid">Válidos</button>
+                            <button class="filter-btn" data-filter="invalid">Inválidos</button>
+                        </div>
+                    </div>
+
+                    <div class="table-actions">
+                        <div class="export-label">Exportar Válidos:</div>
+                        <button class="btn btn-outline" id="btn-export-txt"><i class="fa-solid fa-file-lines"></i> Baixar TXT</button>
+                        <button class="btn btn-outline" id="btn-export-csv"><i class="fa-solid fa-file-csv"></i> Baixar CSV</button>
+                        <button class="btn btn-outline-danger" id="btn-clear-results"><i class="fa-solid fa-eraser"></i> Limpar Resultados</button>
+                    </div>
+
+                    <div class="table-container">
+                        <table class="results-table" id="results-table">
+                            <thead>
+                                <tr>
+                                    <th width="80px">Foto</th>
+                                    <th>Número Digitado</th>
+                                    <th>Formato WhatsApp</th>
+                                    <th>Status</th>
+                                    <th>Detalhes/Erro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="results-tbody">
+                                <tr class="empty-row">
+                                    <td colspan="5" class="no-data">Nenhum número validado ainda. Insira a lista e clique em Iniciar.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Script do Socket.io fornecido pelo próprio servidor Node -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

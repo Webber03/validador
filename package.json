@@ -1,0 +1,18 @@
+{
+  "name": "validador-whats",
+  "version": "1.0.0",
+  "description": "Validador de Números de WhatsApp",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "qrcode": "^1.5.3",
+    "socket.io": "^4.7.5",
+    "whatsapp-web.js": "^1.26.0"
+  }
+}
