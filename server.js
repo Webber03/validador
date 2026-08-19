@@ -40,18 +40,6 @@ function createWhatsAppClient() {
     clientStatus = 'INITIALIZING';
     io.emit('status', { status: clientStatus });
 
-    // Instalação automática do Chromium no Linux caso a aplicação seja reconstruída do zero
-    if (process.platform === 'linux' && !fs.existsSync('/usr/bin/chromium') && !fs.existsSync('/usr/bin/google-chrome-stable')) {
-        try {
-            console.log('Chromium não encontrado. Executando instalação automática no container...');
-            const { execSync } = require('child_process');
-            execSync('apt-get update && apt-get install -y chromium', { stdio: 'inherit' });
-            console.log('Chromium instalado automaticamente com sucesso!');
-        } catch (autoInstallErr) {
-            console.error('Aviso: Não foi possível instalar o Chromium automaticamente:', autoInstallErr.message);
-        }
-    }
-
     // Detecta se existe Chromium do sistema no Linux para evitar erros de cache/permissão
     let systemChromePath = undefined;
     const possiblePaths = [
