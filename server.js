@@ -45,6 +45,8 @@ function createWhatsAppClient() {
     const possiblePaths = [
         '/usr/bin/chromium-browser',
         '/usr/bin/chromium',
+        '/snap/bin/chromium',
+        '/snap/bin/chromium-browser',
         '/usr/bin/google-chrome-stable',
         '/usr/bin/google-chrome'
     ];
