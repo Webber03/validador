@@ -43,19 +43,23 @@ function createWhatsAppClient() {
     // Detecta se existe Chromium do sistema no Linux para evitar erros de cache/permissão
     let systemChromePath = undefined;
     const possiblePaths = [
+        '/opt/google/chrome/chrome',
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/google-chrome',
         '/usr/bin/chromium-browser',
         '/usr/bin/chromium',
         '/snap/bin/chromium',
-        '/snap/bin/chromium-browser',
-        '/usr/bin/google-chrome-stable',
-        '/usr/bin/google-chrome'
+        '/snap/bin/chromium-browser'
     ];
     for (const p of possiblePaths) {
         if (fs.existsSync(p)) {
             systemChromePath = p;
-            console.log('Usando navegando do sistema:', p);
+            console.log('Usando navegador do sistema encontrado em:', p);
             break;
         }
+    }
+    if (!systemChromePath) {
+        console.log('Nenhum navegador do sistema encontrado nas pastas padrão.');
     }
 
     client = new Client({
