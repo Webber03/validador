@@ -40,10 +40,27 @@ function createWhatsAppClient() {
     clientStatus = 'INITIALIZING';
     io.emit('status', { status: clientStatus });
 
+    // Detecta se existe Chromium do sistema no Linux para evitar erros de cache/permissão
+    let systemChromePath = undefined;
+    const possiblePaths = [
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+        '/usr/bin/google-chrome-stable',
+        '/usr/bin/google-chrome'
+    ];
+    for (const p of possiblePaths) {
+        if (fs.existsSync(p)) {
+            systemChromePath = p;
+            console.log('Usando navegando do sistema:', p);
+            break;
+        }
+    }
+
     client = new Client({
         authStrategy: new LocalAuth(),
         puppeteer: {
             headless: true,
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || systemChromePath,
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
